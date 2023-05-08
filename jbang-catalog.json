@@ -1,0 +1,8 @@
+{
+  "catalogs": {},
+  "aliases": {
+    "quarkus-create-from-github": {
+      "script-ref": "CreateFromGithub.java"
+    }
+  }
+}
