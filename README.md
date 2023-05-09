@@ -2,6 +2,11 @@
 
 Collection of JBang scripts related to Quarkus and its subprojects.
 
+## Scripts
+  - [create-from-github](#create-from-github): Create a new project from a Github repository.
+  - [create-from-quickstart](#create-from-quickstart): Create a new project from a Quarkus quickstart.
+  - [generate-data](#generate-data): Generate random data for your JPA entities using ChatGPT.
+
 ### Using from the Quarkus CLI
 
 **Requires**: Quarkus CLI 3.0.1.Final or higher
@@ -142,4 +147,75 @@ hibernate-exmaple
                                 └── FruitsEndpointTest.java
 
 22 directories, 18 files
+```
+
+
+## generate-data
+
+### Enabling the extension
+
+```sh
+❯ quarkus plug add generate-data
+Added plugin:
+    Name                   	 Type  	 Scope 	 Location                                 	 Description 	
+ *  generate-data        	 jbang 	 user  	 quarkus-generate-data@quarkusio 	             	
+
+```
+
+### Usage
+
+Given an entiry like:
+
+```java
+package org.acme;
+
+import java.time.LocalDate;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+
+import io.quarkus.hibernate.reactive.panache.PanacheEntity;
+
+@Entity
+@Table(name = "person")
+public class Person extends PanaceEntity {
+
+  public String firstName;
+  @Column(name = "middle_name")
+  public String middleName;
+  @Column(name = "last_name")
+  public String lastName;
+  @Column(name = "email")
+  public String email;
+  @Column(name = "birth_date")
+  public LocalDate birthDate;
+}
+```
+
+```sh
+❯ quarkus generate-data Person 
+
+Requesting explanation of ./src/main/java/org/acme/Person.java with model gpt-3.5-turbo and temperature 0.8. Have patience...
+INSERT INTO person (first_name, middle_name, last_name, email, birth_date) VALUES
+('John', 'David', 'Smith', 'john.david.smith@example.com', '1990-01-01'),
+('Jane', 'Marie', 'Doe', 'jane.marie.doe@example.com', '1995-05-05'),
+('Michael', null, 'Brown', 'michael.brown@example.com', '1992-12-31'),
+('Emily', 'Rose', 'Wang', 'emily.rose.wang@example.com', '1988-07-23'),
+('William', 'Alexander', 'Davis', 'william.alexander.davis@example.com', '1994-03-17'),
+
+('Sophia', 'Elizabeth', 'Thompson', 'sophia.elizabeth.thompson@example.com', '1985-11-10'),
+('Ethan', 'Christopher', 'Garcia', 'ethan.christopher.garcia@example.com', '1997-02-22'),
+('Avery', null, 'Wilson', 'avery.wilson@example.com', '1991-06-15'),
+('Oliver', 'Benjamin', 'Taylor', 'oliver.benjamin.taylor@example.com', '1989-09-07'),
+('Chloe', 'Isabella', 'Anderson', 'chloe.isabella.anderson@example.com', '1996-12-24'),
+
+('Justin', null, 'Lee', 'justin.lee@example.com', '1990-01-01'),
+('Hannah', 'Grace', 'Robinson', 'hannah.grace.robinson@example.com', '1995-05-05'),
+('David', 'Joseph', 'Green', 'david.joseph.green@example.com', '1992-12-31'),
+('Aaliyah', 'Nicole', 'King', 'aaliyah.nicole.king@example.com', '1988-07-23'),
+('Brandon', 'Daniel', 'Baker', 'brandon.daniel.baker@example.com', '1994-03-17');
+
+File src/main/resources/import.sql has been succesfully updated.
 ```
