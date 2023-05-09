@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
-@Command(name = "from-github",
+@Command(name = "create-from-github",
 description = "Clone a GitHub project locally and clear its git configuration.",
 mixinStandardHelpOptions = true)
 public class CreateFromGithub implements Runnable {
