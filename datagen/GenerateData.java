@@ -38,6 +38,9 @@ import jakarta.inject.Inject;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
+/**
+ * Inspired and reused code from: https://github.com/maxandersen/jbang-catalog/blob/master/explain/explain.java
+ */
 @CommandLine.Command
 public class GenerateData implements Runnable {
 

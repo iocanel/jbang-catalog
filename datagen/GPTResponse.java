@@ -2,6 +2,9 @@
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Original source: https://github.com/maxandersen/jbang-catalog/blob/master/explain/GPTResponse.java
+ */
 class GPTResponse {
 	public String id;
 	public String object;

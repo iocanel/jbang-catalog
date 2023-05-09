@@ -9,6 +9,9 @@ import io.quarkus.rest.client.reactive.NotBody;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 
+/**
+ * Original source: https://github.com/maxandersen/jbang-catalog/blob/master/explain/GPT.java
+ */
 @Path("/v1/chat")
 //@RegisterRestClient
 public interface GPT  {

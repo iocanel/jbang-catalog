@@ -152,6 +152,9 @@ hibernate-exmaple
 
 ## generate-data
 
+  Generate random data for your JPA entities using ChatGPT.
+  Inspired by Max Andersen's [explain](https://github.com/maxandersen/jbang-catalog/tree/master/explain). 
+
 ### Enabling the extension
 
 ```sh
