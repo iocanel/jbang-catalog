@@ -3,6 +3,9 @@
   "aliases": {
     "quarkus-create-from-github": {
       "script-ref": "CreateFromGithub.java"
+    },
+    "quarkus-create-from-quickstart": {
+      "script-ref": "CreateFromQuickstart.java"
     }
   }
 }
