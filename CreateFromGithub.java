@@ -55,24 +55,20 @@ public class CreateFromGithub implements Runnable {
         String newArtifactId = getArtifactId(coords);
 
         File checkoutDir = new File(repoName);
-        File finalDir = new File(newArtifactId);
+        File finalDir = new File(newArtifactId != null ? newArtifactId : repoName);
 
         // Fail fast
-        if (checkoutDir.exists()) {
-            System.out.println("A file named " +repoName + " already exists. Aborting!");
-            return;
-        }
-
         if (finalDir.exists()) {
-            System.out.println("A file named " +newArtifactId + " already exists. Aborting!");
+            System.out.println("A file named " + finalDir.getName() + " already exists. Aborting!");
             return;
         }
 
         try {
+            Path cloneDir = Files.createTempDirectory("create-from-repo-" + repoName);
             // Clone the repository
             CloneCommand cloneCommand = Git.cloneRepository()
             .setURI("https://github.com/" + repository + ".git")
-            .setDirectory(new File(repoName));
+            .setDirectory(cloneDir.toFile());
             Git git = cloneCommand.call();
             Repository repository = git.getRepository();
 
@@ -83,10 +79,11 @@ public class CreateFromGithub implements Runnable {
 
 
             File root = dotGit.getParentFile();
+            File newRoot = new File(newArtifactId != null ? newArtifactId : repoName);
+            root.renameTo(newRoot);
+
             // Check if coords have been specified for the project.
             if (coords != null && !coords.isBlank()) {
-                File newRoot = new File(root.getParentFile(), newArtifactId);
-                root.renameTo(newRoot);
                 updateProject(newRoot, coords);
                 System.out.println("Created project: " + newArtifactId + " from repository:" + repoName);
             } else {
@@ -126,6 +123,9 @@ public class CreateFromGithub implements Runnable {
      * @return the artifactId or throws {@link IllegalArgumentException} if the format is not expected.
      */
     public static String getArtifactId(String coords) {
+        if (coords == null) {
+            return null;
+        }
         String[] parts = coords.split(":");
         switch (parts.length) {
             case 1:
