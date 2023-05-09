@@ -22,9 +22,17 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Command(name = "from-github",
@@ -44,6 +52,21 @@ public class CreateFromGithub implements Runnable {
             throw new IllegalArgumentException("Invalid repository name: " + repository);
         }
         String repoName = parts[1];
+        String newArtifactId = getArtifactId(coords);
+
+        File checkoutDir = new File(repoName);
+        File finalDir = new File(newArtifactId);
+
+        // Fail fast
+        if (checkoutDir.exists()) {
+            System.out.println("A file named " +repoName + " already exists. Aborting!");
+            return;
+        }
+
+        if (finalDir.exists()) {
+            System.out.println("A file named " +newArtifactId + " already exists. Aborting!");
+            return;
+        }
 
         try {
             // Clone the repository
@@ -59,77 +82,154 @@ public class CreateFromGithub implements Runnable {
             config.delete();
 
 
-            System.out.println("Project cloned: " + repoName);
-
             File root = dotGit.getParentFile();
+            // Check if coords have been specified for the project.
             if (coords != null && !coords.isBlank()) {
-                System.out.println("Updating coordinates: " + coords);
-                String newArtifactId = getArtifactId(coords);
                 File newRoot = new File(root.getParentFile(), newArtifactId);
                 root.renameTo(newRoot);
                 updateProject(newRoot, coords);
+                System.out.println("Created project: " + newArtifactId + " from repository:" + repoName);
+            } else {
+                System.out.println("Create project: " + repoName + " from repository:" + repoName);
             }
-
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Extracts the groupId from the specified maven coordinates.
+     * The coordinates fomat is [[GROUP-ID:]ARTIFACT-ID[:VERSION]]
+     * @param coords the coordinates
+     * @return the groupId wrapped in {@link Optional} or throws {@link IllegalArgumentException} if the format is not expected.
+     */
+    public static Optional<String> getGroupId(String coords) {
+        String[] parts = coords.split(":");
+        switch (parts.length) {
+            case 1:
+            return Optional.empty();
+            case 2:
+            return Optional.of(parts[0]);
+            case 3:
+            return  Optional.of(parts[0]);
+            default:
+            throw new IllegalArgumentException("Invalid argument: " + coords);
+        }
+    }
+
+
+    /**
+     * Extracts the artifactId from the specified maven coordinates.
+     * The coordinates fomat is [[GROUP-ID:]ARTIFACT-ID[:VERSION]]
+     * @param coords the coordinates
+     * @return the artifactId or throws {@link IllegalArgumentException} if the format is not expected.
+     */
     public static String getArtifactId(String coords) {
         String[] parts = coords.split(":");
         switch (parts.length) {
             case 1:
-                return parts[0];
+            return parts[0];
             case 2:
-                return parts[1];
+            return parts[1];
             case 3:
-                return  parts[1];
-            default:
-                throw new IllegalArgumentException("Invalid argument: " + coords);
-        }
-
-    }
-
-    public static void updateProject(File root, String coords) {
-        // Parse the argument into groupId, artifactId, and version parts
-        String[] parts = coords.split(":");
-        String groupId = null;
-        String artifactId = null;
-        String version = null;
-        switch (parts.length) {
-            case 1:
-            artifactId = parts[0];
-            break;
-            case 2:
-            groupId = parts[0];
-            artifactId = parts[1];
-            break;
-            case 3:
-            groupId = parts[0];
-            artifactId = parts[1];
-            version = parts[2];
-            break;
+            return  parts[1];
             default:
             throw new IllegalArgumentException("Invalid argument: " + coords);
         }
+    }
 
+    /**
+     * Extracts the version from the specified maven coordinates.
+     * The coordinates fomat is [[GROUP-ID:]ARTIFACT-ID[:VERSION]]
+     * @param coords the coordinates
+     * @return the version wraped in {@link Optional} or throws {@link IllegalArgumentException} if the format is not expected.
+     */
+    public static Optional<String> getVersion(String coords) {
+        String[] parts = coords.split(":");
+        switch (parts.length) {
+            case 1:
+            return Optional.empty();
+            case 2:
+            return Optional.empty();
+            case 3:
+            return  Optional.of(parts[2]);
+            default:
+            throw new IllegalArgumentException("Invalid argument: " + coords);
+        }
+    }
+
+
+    /**
+     * Removes common suffix present in root module artifactIds
+     * For example:
+     * - -pom
+     *   -project
+     *   -parent
+     * @param artifactId
+     * @return the base of the artfiactId
+     */
+    public static String createBaseArtifactId(String artifactId) {
+        return artifactId.replaceAll("\\-pom$", "").replaceAll("\\-project", "").replaceAll("\\-parent", "");
+    }
+
+    public static void updateProject(File root, String coords) {
+        String groupId = getGroupId(coords).orElse(null);
+        String artifactId = getArtifactId(coords);
+        String version = getVersion(coords).orElse(null);
+
+
+        try {
+            boolean isMultiModule = isMultiModuleProject(root);
+            // Load the Maven model
+            MavenXpp3Reader reader = new MavenXpp3Reader();
+            Model model = reader.read(new FileReader(new File(root, "pom.xml")));
+
+            if (!isMultiModule) {
+                updateSingleModuleProject(root, groupId, artifactId, version);
+            } else {
+                String existingGroupId = model.getGroupId();
+
+                String existingArtifactId = model.getArtifactId();
+                String existingArtifactBase = createBaseArtifactId(existingArtifactId);
+                String newArtifactIdBase = createBaseArtifactId(artifactId);
+
+                String existingVersion = model.getVersion();
+                visitPomFiles(root, f -> updateProjectModule(f, existingGroupId, existingArtifactBase, existingVersion, groupId, newArtifactIdBase, version));
+            }
+
+        } catch (IOException | XmlPullParserException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static boolean isMultiModuleProject(File directory) throws IOException {
+        File rootPomFile = new File(directory, "pom.xml");
+        if (!rootPomFile.exists()) {
+            return false;
+        }
+        try {
+            String content = new String(Files.readAllBytes(rootPomFile.toPath()));
+            return content.contains("<modules>");
+        } catch (IOException e) {
+            System.err.println("Failed to read root pom file: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static void updateSingleModuleProject(File root, String groupId, String artifactId, String version) {
         try {
             // Load the Maven model
             MavenXpp3Reader reader = new MavenXpp3Reader();
             Model model = reader.read(new FileReader(new File(root, "pom.xml")));
 
-            // Update the groupId, artifactId, and version
             if (groupId != null) {
-                System.out.println("Setting groupId: " + groupId);
                 model.setGroupId(groupId);
             }
             if (artifactId != null) {
-                System.out.println("Setting artifactId: " + artifactId);
                 model.setArtifactId(artifactId);
             }
             if (version != null) {
-                System.out.println("Setting version: " + version);
                 model.setVersion(version);
             }
 
@@ -139,9 +239,79 @@ public class CreateFromGithub implements Runnable {
             writer.write(fileWriter, model);
             fileWriter.close();
 
-            System.out.println("Project updated: " + model.getGroupId() + ":" + model.getArtifactId() + ":" + model.getVersion());
         } catch (IOException | XmlPullParserException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void updateProjectModule(File pomFile, String originalGroupId, String originalArtifactId, String originalVersion, String groupId, String artifactId, String version) {
+        try {
+            // Load the Maven model
+            MavenXpp3Reader reader = new MavenXpp3Reader();
+            Model model = reader.read(new FileReader(pomFile));
+
+            if (groupId != null) {
+                String existingGroupId = model.getGroupId();
+                if (existingGroupId != null) {
+                    String newGroupId = existingGroupId.replace(originalGroupId, groupId);
+                    model.setGroupId(newGroupId);
+                }
+            }
+            if (artifactId != null) {
+                String existingArtifactId = model.getArtifactId();
+                String newArtifactId = existingArtifactId.replace(originalArtifactId, artifactId);
+                model.setArtifactId(newArtifactId);
+            }
+            if (version != null) {
+                String existingVersion = model.getVersion();
+                if (existingVersion != null) {
+                    model.setVersion(version);
+                }
+            }
+
+            if (model.getParent() != null) {
+                String parentGroupId = model.getParent().getGroupId();
+                String parentArtifactId = model.getParent().getArtifactId();
+                String parentVersion = model.getParent().getVersion();
+
+                if (parentGroupId != null) {
+                        String newParentGroupId = parentGroupId.replace(originalGroupId, groupId);
+                        model.getParent().setGroupId(newParentGroupId);
+                }
+
+                if (parentArtifactId != null) {
+                    String newParentArtifactId = parentArtifactId.replace(originalArtifactId, artifactId);
+                    model.getParent().setArtifactId(newParentArtifactId);
+                }
+
+                if (parentVersion != null) {
+                    model.getParent().setVersion(version);
+                }
+            }
+
+            // Save the updated Maven model
+            MavenXpp3Writer writer = new MavenXpp3Writer();
+            FileWriter fileWriter = new FileWriter(pomFile);
+            writer.write(fileWriter, model);
+            fileWriter.close();
+
+        } catch (IOException | XmlPullParserException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private static void visitPomFiles(File directory, Consumer<File> consumer) {
+        try (Stream<Path> stream = Files.walk(Paths.get(directory.getAbsolutePath()))) {
+            List<File> pomFiles = stream
+            .map(Path::toFile)
+            .filter(file -> file.getName().endsWith("pom.xml"))
+            .collect(Collectors.toList());
+            for (File pomFile : pomFiles) {
+                consumer.accept(pomFile);
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to visit pom files: " + e.getMessage());
         }
     }
 
