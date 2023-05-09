@@ -4,6 +4,8 @@
 //DEPS org.apache.maven:maven-model:3.8.1
 //DEPS org.apache.maven:maven-model-builder:3.8.1
 //DEPS org.codehaus.plexus:plexus-utils:3.3.0
+//DEPS org.slf4j:slf4j-simple:1.6.1
+//Q:CONFIG quarkus.log.level=ERROR
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
@@ -38,6 +40,7 @@ import java.util.stream.Stream;
 @Command(name = "create-from-github",
 description = "Clone a GitHub project locally and clear its git configuration.",
 mixinStandardHelpOptions = true)
+@SuppressWarnings("deprecation")
 public class CreateFromGithub implements Runnable {
 
     @Parameters(index = "0", description = "The owner and name of the GitHub repository, in the form 'owner/repository'.", arity = "1")
@@ -45,7 +48,7 @@ public class CreateFromGithub implements Runnable {
 
     @Parameters(index = "1", description = "The coordinates of the project in the form [[GROUP-ID:]ARTIFACT-ID[:VERSION]].", arity = "0..1")
     private String coords;
-
+    
     public void run() {
         String[] parts = repository.split("/");
         if (parts.length != 2) {

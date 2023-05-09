@@ -4,6 +4,8 @@
 //DEPS org.apache.maven:maven-model:3.8.1
 //DEPS org.apache.maven:maven-model-builder:3.8.1
 //DEPS org.codehaus.plexus:plexus-utils:3.3.0
+//DEPS org.slf4j:slf4j-simple:1.6.1
+//Q:CONFIG quarkus.log.level=ERROR
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
@@ -40,10 +42,10 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-
 @Command(name = "create-from-quickstart",
 description = "Clone a Quarkus quickstart locally and clear its git configuration.",
 mixinStandardHelpOptions = true)
+@SuppressWarnings("deprecation")
 public class CreateFromQuickstart implements Runnable {
 
     private String repository = "quarkusio/quarkus-quickstarts";
