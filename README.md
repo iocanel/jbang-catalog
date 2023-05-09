@@ -200,7 +200,7 @@ public class Person extends PanaceEntity {
 ```sh
 ❯ quarkus generate-data Person 
 
-Requesting explanation of ./src/main/java/org/acme/Person.java with model gpt-3.5-turbo and temperature 0.8. Have patience...
+Populate data for entity ./src/main/java/org/acme/Person.java with model gpt-3.5-turbo and temperature 0.8. Have patience...
 INSERT INTO person (first_name, middle_name, last_name, email, birth_date) VALUES
 ('John', 'David', 'Smith', 'john.david.smith@example.com', '1990-01-01'),
 ('Jane', 'Marie', 'Doe', 'jane.marie.doe@example.com', '1995-05-05'),

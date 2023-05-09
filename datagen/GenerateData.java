@@ -84,7 +84,7 @@ public class GenerateData implements Runnable {
 			Optional<Path> sourceFile = paths.filter(isSourceFileForClass).findFirst();
 			sourceFile.ifPresent(p -> {
 				//working around CR1 bug with passing arguments
-				System.out.println("Requesting explanation of " + p + " with model " + model + " and temperature " + temperature + ". Have patience...");
+				System.out.println("Populating data for entity " + p + " with model " + model + " and temperature " + temperature + ". Have patience...");
 				GPT gpt = RestClientBuilder.newBuilder().baseUri(URI.create("https://api.openai.com")).build(GPT.class);
 
 				final List<Map<String, String>> messages = new ArrayList<>();
