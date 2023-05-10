@@ -58,7 +58,8 @@ public class GenerateData implements Runnable {
 	@Option(names = { "-T", "--temperature" }, description = "The temperature to use", required = true, defaultValue = "0.8", hidden=true)
 	double temperature;
 
-	int limit = 15;
+	@Option(names = { "-l", "--limit" }, description = "The limit (as in number of rows to generate)", required = true, defaultValue = "10", hidden=false)
+	int limit;
 
 	@Override
 	public void run() {
@@ -91,11 +92,9 @@ public class GenerateData implements Runnable {
 				messages.add(prompt("system", "You are a data generator that generates random data in sql format." +
 					"Your input is going to be JPA entity source files." +
 					"The data that you are going to generate should be in the form of sql insert statements for the corresponding tables." +
-					"Make sure that each sql statement you provide is complete and not partial due to the ChatGPT word limit." + 
 					"Responses should contain no text, or instructions just insert statements. They should always be valid sql code." +
-					"To minimize the size of the exchanged data responses should contain a single insert statement that inserts multiple rows." + 
-					"Each response should be formated so that the INSERT and VALUES keywords are always in the first line." +
-					"Each time I respond with the keyword more you should generate more rows."));
+					"To minimize the size of the exchanged data responses should contain a single insert statement that inserts " + limit + " rows.")); 
+
 				try {
 					messages.add(prompt("user", Files.readAllLines(sourceFile.get()).stream().collect(Collectors.joining("\n"))));
 				} catch (IOException e) {
@@ -136,7 +135,7 @@ public class GenerateData implements Runnable {
 						System.out.println(content);
 						writer.write(content);
 						messages.add(prompt("assistant", previous));
-						messages.add(prompt("system", "more"));
+						messages.add(prompt("system", "continue"));
 					}
 					System.out.println("File src/main/resources/import.sql has been succesfully updated!");
 				} catch (IOException e) {
