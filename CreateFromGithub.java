@@ -27,10 +27,16 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.FileVisitResult;
+import java.nio.file.attribute.BasicFileAttributes;
+
 import java.util.Optional;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -48,7 +54,7 @@ public class CreateFromGithub implements Runnable {
 
     @Parameters(index = "1", description = "The coordinates of the project in the form [[GROUP-ID:]ARTIFACT-ID[:VERSION]].", arity = "0..1")
     private String coords;
-    
+
     public void run() {
         String[] parts = repository.split("/");
         if (parts.length != 2) {
@@ -80,11 +86,10 @@ public class CreateFromGithub implements Runnable {
             File config = new File(dotGit, Constants.CONFIG);
             config.delete();
 
-
             File root = dotGit.getParentFile();
             File newRoot = new File(newArtifactId != null ? newArtifactId : repoName);
-            root.renameTo(newRoot);
 
+            move(root.toPath(), newRoot.toPath());
             // Check if coords have been specified for the project.
             if (coords != null && !coords.isBlank()) {
                 updateProject(newRoot, coords);
@@ -278,8 +283,8 @@ public class CreateFromGithub implements Runnable {
                 String parentVersion = model.getParent().getVersion();
 
                 if (parentGroupId != null) {
-                        String newParentGroupId = parentGroupId.replace(originalGroupId, groupId);
-                        model.getParent().setGroupId(newParentGroupId);
+                    String newParentGroupId = parentGroupId.replace(originalGroupId, groupId);
+                    model.getParent().setGroupId(newParentGroupId);
                 }
 
                 if (parentArtifactId != null) {
@@ -316,6 +321,25 @@ public class CreateFromGithub implements Runnable {
         } catch (IOException e) {
             System.err.println("Failed to visit pom files: " + e.getMessage());
         }
+    }
+
+    private static boolean move(Path source, Path destination) throws IOException {
+            Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Path destFile = destination.resolve(source.relativize(file));
+                    Files.move(file, destFile, StandardCopyOption.REPLACE_EXISTING);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    Path destDir = destination.resolve(source.relativize(dir));
+                    Files.createDirectories(destDir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        return true;
     }
 
     public static void main(String[] args) {
