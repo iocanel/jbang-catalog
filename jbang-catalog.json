@@ -10,7 +10,7 @@
       "description": "Create a new project using a Quarkus quickstart as a template"
     },
     "quarkus-generate-data": {
-      "script-ref": "datagen/GenerateData.java",
+      "script-ref": "GenerateData.java",
       "description": "Populate your import.sql with generated data for your JPA entities"
     }
   }

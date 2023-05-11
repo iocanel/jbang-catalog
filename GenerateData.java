@@ -7,7 +7,7 @@
 //DEPS io.quarkus:quarkus-rest-client-reactive-jackson
 //Q:CONFIG quarkus.banner.enabled=false
 //Q:CONFIG quarkus.log.level=WARN
-//SOURCES GPT.java GPTResponse.java
+//SOURCES chat/GPT.java chat/GPTResponse.java
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -186,10 +186,5 @@ public class GenerateData implements Runnable {
                 String regex = "\\(([^()]*|\\([^()]*\\))*\\)";
                 return sql.split(regex).length - 1;
 	}
-
-	/*public static void main(String[] args) {
-		System.out.println(Arrays.toString(args));
-		Quarkus.run(args);
-	}*/
 }
 
