@@ -12,6 +12,10 @@
     "quarkus-generate-data": {
       "script-ref": "GenerateData.java",
       "description": "Populate your import.sql with generated data for your JPA entities"
+    },
+    "quarkus-present": {
+      "script-ref": "Present.java",
+      "description": "Present markdown as a Quarkus themed reveal.js presentation"
     }
   }
 }
