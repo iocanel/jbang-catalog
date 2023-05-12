@@ -2,20 +2,16 @@
   "catalogs": {},
   "aliases": {
     "quarkus-create-from-github": {
-      "script-ref": "CreateFromGithub.java",
-      "description": "Create a new project using a Github repository as a template"
+      "script-ref": "CreateFromGithub.java"
     },
     "quarkus-create-from-quickstart": {
-      "script-ref": "CreateFromQuickstart.java",
-      "description": "Create a new project using a Quarkus quickstart as a template"
+      "script-ref": "CreateFromQuickstart.java"
     },
     "quarkus-generate-data": {
-      "script-ref": "GenerateData.java",
-      "description": "Populate your import.sql with generated data for your JPA entities"
+      "script-ref": "GenerateData.java"
     },
     "quarkus-present": {
-      "script-ref": "Present.java",
-      "description": "Present markdown as a Quarkus themed reveal.js presentation"
+      "script-ref": "Present.java"
     }
   }
 }
