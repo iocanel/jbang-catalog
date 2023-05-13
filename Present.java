@@ -34,6 +34,7 @@ class Present implements Runnable  {
 
     private static final String JBANG_PRESENTATION_REPO = "https://github.com/iocanel/reveal.js.git";
     private static final String JBANG_PRESENTATION_DIR = "JBANG_PRESENTATION_DIR";
+    private static final String SLIDES_FILENAME = "slides.md";
 
     @Parameters(index = "0", description = "The presentation file")
     private File slidesFile;
@@ -55,7 +56,7 @@ class Present implements Runnable  {
             .or(() -> getPresentationDirFromEnv()) 
             .orElseGet(() -> clonePresentationRepo(JBANG_PRESENTATION_REPO));
 
-            Files.copy(slidesFile.toPath(), presentationDir.resolve(slidesFile.getName()), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(slidesFile.toPath(), presentationDir.resolve(SLIDES_FILENAME), StandardCopyOption.REPLACE_EXISTING);
 
             HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/", exchange -> {
