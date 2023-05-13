@@ -56,15 +56,25 @@ class Present implements Runnable  {
             .or(() -> getPresentationDirFromEnv()) 
             .orElseGet(() -> clonePresentationRepo(JBANG_PRESENTATION_REPO));
 
-            Files.copy(slidesFile.toPath(), presentationDir.resolve(SLIDES_FILENAME), StandardCopyOption.REPLACE_EXISTING);
-
             HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/", exchange -> {
                 String requestPath = exchange.getRequestURI().getPath();
+                File root = presentationDir.toFile();
+                //1. Redirect / -> /index.html
                 if (requestPath.equals("/")) {
                    requestPath = "/index.html";
                 }
-                File requestedFile = new File(presentationDir.toFile(), requestPath.substring(1));
+                //2. Redirect /slides.md -> /src/$slidesFile
+                if (requestPath.startsWith("/slides.md")) {
+                    requestPath = "/src/" + slidesFile.getName() ;
+                }
+                //3. Redirect /src/foo -> /foo
+                if (requestPath.startsWith("/src")) {
+                    root = slidesFile.getParentFile();
+                    requestPath = requestPath.substring(4);
+                }
+                //4. Else serve request from root that should match presentDir
+                File requestedFile = new File(root, requestPath.substring(1));
                 if (requestedFile.exists() && requestedFile.isFile()) {
                     byte[] fileBytes = Files.readAllBytes(requestedFile.toPath());
                     exchange.sendResponseHeaders(200, fileBytes.length);
