@@ -7,6 +7,9 @@
     "quarkus-create-from-quickstart": {
       "script-ref": "CreateFromQuickstart.java"
     },
+    "quarkus-generate-entity": {
+      "script-ref": "GenerateEntity.java"
+    },
     "quarkus-generate-data": {
       "script-ref": "GenerateData.java"
     },
