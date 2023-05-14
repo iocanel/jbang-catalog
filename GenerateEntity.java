@@ -7,31 +7,16 @@
 //DEPS io.quarkus:quarkus-rest-client-reactive-jackson
 //Q:CONFIG quarkus.banner.enabled=false
 //Q:CONFIG quarkus.log.level=WARN
-//SOURCES chat/GPT.java chat/GPTResponse.java chat/JavaCodeGenerator.java
+//SOURCES chat/GPT.java chat/GPTResponse.java chat/CodeGenerator.java chat/Project.java
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.Map;
 import java.util.Set;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.eclipse.microprofile.rest.client.RestClientBuilder;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import io.quarkus.runtime.Quarkus;
 import jakarta.inject.Inject;
@@ -44,7 +29,6 @@ import picocli.CommandLine.Option;
 @CommandLine.Command
 public class GenerateEntity implements Runnable {
 
-	private static final Predicate<Path> IS_JAVA_FILE = path -> path.toString().endsWith(".java");
 
 	@CommandLine.Parameters(index = "0", description = "The (fully qualified) class name to genearate data for.")
 	String name;
@@ -60,20 +44,10 @@ public class GenerateEntity implements Runnable {
 
 	@Override
 	public void run() {
-		File root = new File(".");
-		File src = new File(root, "src");
-		File main = new File(src, "main");
-		File java = new File(main, "java");
-
-		// Check directory structure
-		if (!java.exists() || !java.isDirectory()) {
-			System.out.println("Failed to locate the source folder `src/main/java`. Aborting!");
-			return;
-		}
-
-		String packageName = name.contains(".") ? name.substring(0, name.lastIndexOf(".")) : null;
-		String className = name.substring(name.lastIndexOf(".") + 1);
-		Path sourcePath = java.toPath().resolve(name.replace('.', File.separatorChar) + ".java");
+		Project.requireJavaSources();
+		Optional<String> packageName = Project.packageOf(name);
+		String className = Project.classNameOf(name);
+		Path sourcePath = Project.javaSourceFileOf(name);
 		File sourceFile = sourcePath.toFile();
 		try {
 			if (!sourceFile.getParentFile().exists() && !sourceFile.getParentFile().mkdirs()) {
@@ -87,7 +61,7 @@ public class GenerateEntity implements Runnable {
 			return;
 		}
 
-		JavaCodeGenerator generator = new JavaCodeGenerator(token, model, temperature);
+		CodeGenerator generator = CodeGenerator.forJava(token, model, temperature);
 
 		StringBuilder instructions = new StringBuilder();
 		instructions.append("Generatre a JPA entity with class name " + className  + ".");
