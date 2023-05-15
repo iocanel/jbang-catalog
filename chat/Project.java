@@ -17,9 +17,14 @@ import java.util.stream.Stream;
 public class Project {
 
 	public static final File DIR = new File(".");
+
 	public static final File SRC = new File(DIR, "src");
 	public static final File MAIN = new File(SRC, "main");
 	public static final File JAVA = new File(MAIN, "java");
+
+	public static final File TEST = new File(SRC, "test");
+	public static final File TEST_JAVA = new File(TEST, "java");
+
 	public static final File RESOURCES = new File(MAIN, "resources");
 
 	public static final String NEWLINE = "\n";
@@ -78,6 +83,17 @@ public class Project {
 	**/
 	public static Path javaSourceFileOf(String fqcn) {
 		return JAVA.toPath().resolve(fqcn.replace('.', File.separatorChar) + ".java");
+	}
+
+	/**
+	 * Create the Path to a java source file matching the specified
+	 * fully qualified class name.
+	 * The function just perfroms mapping it does not actually search.
+	 * @param fqcn the fully qualified class name
+	 * @return the paht.
+	**/
+	public static Path javaTestFileOf(String fqcn) {
+		return TEST_JAVA.toPath().resolve(fqcn.replace('.', File.separatorChar) + ".java");
 	}
 
 	/**

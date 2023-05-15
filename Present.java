@@ -39,7 +39,7 @@ class Present implements Runnable  {
     @Parameters(index = "0", description = "The presentation file")
     private File slidesFile;
 
-    @Option(names = {"-p", "--port"}, defaultValue = "8080", description = "The server port")
+    @Option(names = {"-p", "--port"}, defaultValue = "8000", description = "The server port")
     private int port;
 
     @Option(names = {"-d", "--presentation-dir"}, description = "A local presentation directory to use")
@@ -88,7 +88,7 @@ class Present implements Runnable  {
                 }
             });
             server.start();
-            System.out.println("Server started on port " + port);
+            System.out.println("Presentation served at: http://localhost:" + port);
         } catch (IOException e) {
             System.err.println("Error starting the server: " + e.getMessage());
         }
