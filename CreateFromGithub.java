@@ -14,6 +14,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -73,12 +74,23 @@ public class CreateFromGithub implements Runnable {
         }
 
         try {
-            Path cloneDir = Files.createTempDirectory("create-from-repo-" + repoName);
-            // Clone the repository
-            CloneCommand cloneCommand = Git.cloneRepository()
-            .setURI("https://github.com/" + repository + ".git")
-            .setDirectory(cloneDir.toFile());
-            Git git = cloneCommand.call();
+            Git git = null;
+            Path cloneDir = null;
+            for (int retry=1; retry <= 3; retry++) {
+                try {
+                    cloneDir = Files.createTempDirectory("create-from-repo-" + repoName);
+                     // Clone the repository
+                    CloneCommand cloneCommand = Git.cloneRepository()
+                    .setURI("https://github.com/" + repository + ".git")
+                    .setDirectory(cloneDir.toFile());
+
+                    git = cloneCommand.call();
+                } catch (TransportException e) {
+                    System.out.println("Transport error, retrying ...");
+                    continue;
+                }
+            } 
+
             Repository repository = git.getRepository();
 
             // Clear the Git configuration
