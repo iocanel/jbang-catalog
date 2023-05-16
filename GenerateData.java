@@ -49,7 +49,7 @@ public class GenerateData implements Runnable {
 		Optional<Path> sourceFile = Project.findJavaSourceFile(name);
 		sourceFile.ifPresent(p -> {
 			//working around CR1 bug with passing arguments
-			System.out.println("Populating data for entity " + p + " with model " + model + " and temperature " + temperature + ". Have patience...");
+			System.out.println("Populating data for entity " + p.relativize(Project.DIR.toPath()) + " with model " + model + " and temperature " + temperature + ". Have patience...");
 
 			CodeGenerator generator = CodeGenerator.forSQL(token, model, temperature);
 			List<String> lines = generator.generate("Your input is going to be JPA entity source files." +
@@ -67,7 +67,8 @@ public class GenerateData implements Runnable {
 					System.out.println(line);
 					writer.write("\n");
 				}
-				System.out.println("File src/main/resources/import.sql has been succesfully updated!");
+
+				System.out.println("File " + importSql.toPath().relativize(Project.DIR.toPath()) + " has been succesfully updated!");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

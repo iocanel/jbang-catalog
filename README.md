@@ -6,16 +6,25 @@ Collection of JBang scripts related to Quarkus and its subprojects.
   - [create-from-github](#create-from-github): Create a new project from a Github repository.
   - [create-from-quickstart](#create-from-quickstart): Create a new project from a Quarkus quickstart.
   - [generate-data](#generate-data): Generate random data for your JPA entities using ChatGPT.
+  - [generate-entity](#generate-entity): Generate JPA entities using ChatGPT.
 
 ### Using from the Quarkus CLI
 
 **Requires**: Quarkus CLI 3.0.1.Final or higher
 
+#### Versions [3.0.1, Final, 3.0.3.Final]
 The scripts can added to the Quarkus CLI in the form of plugins, by replacing the `quarkusio` catalog of jbang with this one.
 
 ```sh
 jbang catalog remove quarkusio
 jbang catalog add --name=quarkusio https://github.com/iocanel/jbang-catalog/blob/HEAD/jbang-catalog.json
+quarkus plug list --installable
+```
+#### Versions (3.0.3.Final, )
+The Quarkus CLI supports multiple remote jbang catalogs. So this can be added next to the default one (`quarkusio`).
+
+```sh
+jbang catalog add --name=iocanel https://github.com/iocanel/jbang-catalog/blob/HEAD/jbang-catalog.json
 quarkus plug list --installable
 ```
 
@@ -24,9 +33,8 @@ This should return in something like:
 ```
 ❯ quarkus plug list --installable
     Name                   	 Type  	 Scope 	 Location                                 	 Description 	
- *  explain                	 jbang 	 user  	 quarkus-explain                          	             	
-    create-from-quickstart 	 jbang 	 user  	 quarkus-create-from-quickstart@quarkusio 	             	
-    create-from-github     	 jbang 	 user  	 quarkus-create-from-github@quarkusio     	             	
+    create-from-quickstart 	 jbang 	 user  	 quarkus-create-from-quickstart@iocanel 	             	
+    create-from-github     	 jbang 	 user  	 quarkus-create-from-github@iocanel     	             	
 
 Use the 'plugin add' sub command and pass the location of any plugin listed above, or any remote location in the form of URL / GACTV pointing to a remote plugin.
 ```
@@ -200,7 +208,7 @@ public class Person extends PanaceEntity {
 ```sh
 ❯ quarkus generate-data Person 
 
-Populating data for entity ./src/main/java/org/acme/Person.java with model gpt-3.5-turbo and temperature 0.8. Have patience...
+Populating data for entity src/main/java/org/acme/Person.java with model gpt-3.5-turbo and temperature 0.8. Have patience...
 INSERT INTO person (first_name, middle_name, last_name, email, birth_date) VALUES
 ('John', 'David', 'Smith', 'john.david.smith@example.com', '1990-01-01'),
 ('Jane', 'Marie', 'Doe', 'jane.marie.doe@example.com', '1995-05-05'),
@@ -221,4 +229,88 @@ INSERT INTO person (first_name, middle_name, last_name, email, birth_date) VALUE
 ('Brandon', 'Daniel', 'Baker', 'brandon.daniel.baker@example.com', '1994-03-17');
 
 File src/main/resources/import.sql has been succesfully updated.
+```
+
+## generate-entity
+
+  Generate JPA entities using ChatGPT.
+  Also inspired by Max Andersen's [explain](https://github.com/maxandersen/jbang-catalog/tree/master/explain). 
+
+### Enabling the extension
+
+```sh
+❯ quarkus plug add generate-data
+Added plugin:
+    Name                   	 Type  	 Scope 	 Location                                 	 Description 	
+ *  generate-entity        	 jbang 	 user  	 quarkus-generate-entity@quarkusio 	             	
+
+```
+
+### Usage
+
+```sh
+❯ quarkus generate-entity org.acme.Address
+Generating entity org.acme.Address with model gpt-3.5-turbo and temperature 0.8. Have patience...
+package org.acme;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
+public class Address {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String street;
+    private String city;
+    private String state;
+    private String zipCode;
+
+    public Address() {}
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getZipCode() {
+        return zipCode;
+    }
+
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
+    }
+
+File src/main/java/org/acme/Address.java has been succesfully created.
+}
 ```
