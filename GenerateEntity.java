@@ -65,9 +65,9 @@ public class GenerateEntity implements Runnable {
 
 		StringBuilder instructions = new StringBuilder();
 		instructions.append("Generatre a JPA entity with class name " + className  + ".");
+		instructions.append("The code needs to include getters and setters.");
 		if (packageName != null && !packageName.isEmpty()) {
 			instructions.append("Use package name " + packageName + ".");
-			instructions.append("Ensure that getters and setters are generated.");
 		}
 
 		try (FileWriter writer = new FileWriter(sourceFile, false)) {
