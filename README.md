@@ -7,6 +7,7 @@ Collection of JBang scripts related to Quarkus and its subprojects.
   - [create-from-quickstart](#create-from-quickstart): Create a new project from a Quarkus quickstart.
   - [generate-data](#generate-data): Generate random data for your JPA entities using ChatGPT.
   - [generate-entity](#generate-entity): Generate JPA entities using ChatGPT.
+  - [generate-rest](#generate-rest): Generate JAX-RS endpoint for an entity using ChatGPT.
 
 ### Using from the Quarkus CLI
 
@@ -51,7 +52,7 @@ Allows creating a project from an existing github repository, optionally specify
 ❯ quarkus plug add create-from-github
 Added plugin:
     Name               	 Type  	 Scope   	 Location                             	 Description 	
- *  create-from-github 	 jbang 	 project 	 quarkus-create-from-github@quarkusio
+ *  create-from-github 	 jbang 	 project 	 quarkus-create-from-github@iocanel
 ```
 
 ### Usage
@@ -102,7 +103,7 @@ Similar to `create-from-github` but uses a fixed repository `quarkusio/quarkus-q
 ❯ quarkus plug add create-from-quickstart
 Added plugin:
     Name                   	 Type  	 Scope 	 Location                                 	 Description 	
- *  create-from-quickstart 	 jbang 	 user  	 quarkus-create-from-quickstart@quarkusio 	             	
+ *  create-from-quickstart 	 jbang 	 user  	 quarkus-create-from-quickstart@iocanel 	             	
 
 ```
 
@@ -169,7 +170,7 @@ hibernate-exmaple
 ❯ quarkus plug add generate-data
 Added plugin:
     Name                   	 Type  	 Scope 	 Location                                 	 Description 	
- *  generate-data        	 jbang 	 user  	 quarkus-generate-data@quarkusio 	             	
+ *  generate-data        	 jbang 	 user  	 quarkus-generate-data@iocanel 	             	
 
 ```
 
@@ -242,7 +243,7 @@ File src/main/resources/import.sql has been succesfully updated.
 ❯ quarkus plug add generate-data
 Added plugin:
     Name                   	 Type  	 Scope 	 Location                                 	 Description 	
- *  generate-entity        	 jbang 	 user  	 quarkus-generate-entity@quarkusio 	             	
+ *  generate-entity        	 jbang 	 user  	 quarkus-generate-entity@iocanel 	             	
 
 ```
 
@@ -314,3 +315,19 @@ public class Address {
 File src/main/java/org/acme/Address.java has been succesfully created.
 }
 ```
+
+## generate-rest
+
+  Generate JAX-RS endpoints using ChatGPT.
+  Also inspired by Max Andersen's [explain](https://github.com/maxandersen/jbang-catalog/tree/master/explain). 
+
+### Enabling the extension
+
+```sh
+❯ quarkus plug add generate-rest
+Added plugin:
+    Name                   	 Type  	 Scope 	 Location                                 	 Description 	
+ *  generate-rest        	 jbang 	 user  	 quarkus-generate-rest@iocanel 	             	
+
+```
+
