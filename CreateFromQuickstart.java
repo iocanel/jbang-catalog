@@ -75,13 +75,14 @@ public class CreateFromQuickstart implements Runnable {
             return;
         }
 
+        System.out.println("Creating " + finalDir.getName() + "!");
         try {
 
             Git git = null;
             Path cloneDir = null;
             for (int retry=1; retry <= 3; retry++) {
                 try {
-                    cloneDir = Files.createTempDirectory("create-from-quickstart-" + repoName);
+                    cloneDir = Files.createTempDirectory("create-from-quickstart-" + quickstart);
                      // Clone the repository
                     CloneCommand cloneCommand = Git.cloneRepository()
                     .setURI("https://github.com/" + repository + ".git")
@@ -107,15 +108,15 @@ public class CreateFromQuickstart implements Runnable {
             config.delete();
 
             File root = new File(dotGit.getParentFile(), quickstart);
-            File newRoot = new File(newArtifactId != null ? newArtifactId : repoName);
+            File newRoot = new File(newArtifactId != null ? newArtifactId : quickstart);
             move(root.toPath(), newRoot.toPath());
 
             // Check if coords have been specified for the project.
             if (coords != null && !coords.isBlank()) {
                 updateProject(newRoot, coords);
-                System.out.println("Created project: " + newArtifactId + " from repository:" + repoName);
+                System.out.println("Created project: " + newArtifactId + " from repository:" + quickstart);
             } else {
-                System.out.println("Create project: " + repoName + " from repository:" + repoName);
+                System.out.println("Created project: " + quickstart + " from repository:" + quickstart);
             }
 
         } catch (Exception e) {
