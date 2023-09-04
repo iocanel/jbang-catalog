@@ -63,15 +63,11 @@ public class CreateFromQuickstart implements Runnable {
     private String coords;
 
     public void run() {
-        String[] parts = repository.split("/");
-        if (parts.length != 2) {
-            throw new IllegalArgumentException("Invalid repository name: " + repository);
-        }
-        String repoName = parts[1];
         String newArtifactId = getArtifactId(coords);
 
-        File checkoutDir = new File(repoName);
-        File finalDir = new File(newArtifactId != null ? newArtifactId : repoName);
+        File checkoutDir = new File(quickstart);
+        File finalDir = new File(newArtifactId != null ? newArtifactId : quickstart);
+       
 
         // Fail fast
         if (finalDir.exists()) {
