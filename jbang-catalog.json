@@ -13,6 +13,10 @@
     "quarkus-generate-data": {
       "script-ref": "GenerateData.java"
     },
+    "quarkus-generate-rest": {
+      "script-ref": "GenerateRest.java"
+    },
+
     "quarkus-present": {
       "script-ref": "Present.java"
     }
