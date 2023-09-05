@@ -1,5 +1,9 @@
 {
-  "catalogs": {},
+  "catalogs": {
+    "iocanel": {
+      "catalog-ref": "https://github.com/iocanel/jbang-catalog/blob/HEAD/jbang-catalog.json"
+    }
+  },
   "aliases": {
     "quarkus-create-from-github": {
       "script-ref": "CreateFromGithub.java"
@@ -16,9 +20,12 @@
     "quarkus-generate-rest": {
       "script-ref": "GenerateRest.java"
     },
-
+    "quarkus-generate-test": {
+      "script-ref": "GenerateTest.java"
+    },
     "quarkus-present": {
       "script-ref": "Present.java"
     }
-  }
+  },
+  "templates": {}
 }

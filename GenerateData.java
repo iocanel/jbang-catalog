@@ -56,6 +56,7 @@ public class GenerateData implements Runnable {
 				"The data that you are going to generate should be in the form of sql insert statements for the corresponding tables." +
 				"Always include the id, even if it can be auto generated." +
 				"Generated data should be realistic." +
+        "At the end of the data add an alter sequence statement to increment the id sequence." +
 				"To minimize the size of the exchanged data responses should contain a single insert statement that inserts " + limit + " rows." +
 				"The entity is: \n" +
 				Project.readFile(p));

@@ -61,6 +61,7 @@ public class GenerateRest implements Runnable {
         "The class should be JAX-RS endpoint that implements CRUD operations."  +
         "The generated class should avoid using named queries." +
         "The generated class should only inject the EntityManager." +
+        "Methods that that write to the database should be annotated with the @Transactional annotation."  +
         "The generated class should include a method to list all." +
         "The target entity is: \n" +
 				Project.readFile(f));
