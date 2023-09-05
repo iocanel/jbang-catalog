@@ -39,7 +39,7 @@ public class GenerateEntity implements Runnable {
 	@Option(names = { "-m", "--model" }, description = "The OpenAI model to use", required = true, defaultValue = "gpt-3.5-turbo", hidden=true)
 	String model;
 
-	@Option(names = { "-T", "--temperature" }, description = "The temperature to use", required = true, defaultValue = "0.8", hidden=true)
+	@Option(names = { "-T", "--temperature" }, description = "The temperature to use", required = true, defaultValue = "0.1", hidden=true)
 	double temperature;
 
 	@Override
@@ -70,6 +70,10 @@ public class GenerateEntity implements Runnable {
 			instructions.append("Use package name " + p + ".");
 		});
 
+    if (sourceFile.exists()) {
+      sourceFile.delete();
+    }
+
 		try (FileWriter writer = new FileWriter(sourceFile, false)) {
 			System.out.println("Generating entity " + name + " with model " + model + " and temperature " + temperature + ". Have patience...");
 			for (String line : generator.generate(instructions.toString())) {
@@ -78,7 +82,7 @@ public class GenerateEntity implements Runnable {
 				System.out.println(line);
 				writer.write(line + "\n");
 			}
-			System.out.println("File " + sourceFile.toPath().relativize(Project.DIR.toPath()) + " has been succesfully created!");
+			System.out.println("File " + sourceFile.toPath() + " has been succesfully created!");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -40,11 +40,8 @@ public class GenerateRest implements Runnable {
 	@Option(names = { "-m", "--model" }, description = "The OpenAI model to use", required = true, defaultValue = "gpt-3.5-turbo", hidden=true)
 	String model;
 
-	@Option(names = { "-T", "--temperature" }, description = "The temperature to use", required = true, defaultValue = "0.8", hidden=true)
+	@Option(names = { "-T", "--temperature" }, description = "The temperature to use", required = true, defaultValue = "0.1", hidden=true)
 	double temperature;
-
-	@Option(names = { "-l", "--limit" }, description = "The limit (as in number of rows to generate)", required = true, defaultValue = "10", hidden=false)
-	int limit;
 
 	@Override
 	public void run() {
@@ -54,19 +51,23 @@ public class GenerateRest implements Runnable {
 		Path restEndpointPath = Project.javaSourceFileOf(restEndpointName);
 
 		Optional<Path> sourceFile = Project.findJavaSourceFile(entityName);
-		sourceFile.ifPresent(p -> {
+		sourceFile.ifPresent(f-> {
 			//working around CR1 bug with passing arguments
-			System.out.println("Populating data for entity " + p.relativize(Project.DIR.toPath()) + " with model " + model + " and temperature " + temperature + ". Have patience...");
+			System.out.println("Generating rest endpoint for entity " + entityName + " with model " + model + " and temperature " + temperature + ". Have patience...");
 
-			CodeGenerator generator = CodeGenerator.forSQL(token, model, temperature);
+			CodeGenerator generator = CodeGenerator.forJava(token, model, temperature);
 			List<String> lines = generator.generate("Your input is going to be JPA entity source files." +
-				"Generate a java class with fullly qualified name: " + className + "." +
+				"Generate a java class with name: " + className + packageName.map(p -> " and package:" + p).orElse(" and no package") + "."  +
         "The class should be JAX-RS endpoint that implements CRUD operations."  +
         "The generated class should avoid using named queries." +
         "The generated class should only inject the EntityManager." +
         "The generated class should include a method to list all." +
         "The target entity is: \n" +
-				Project.readFile(p));
+				Project.readFile(f));
+
+      if (restEndpointPath.toFile().exists()) {
+         restEndpointPath.toFile().delete();
+      }
 
 			try (FileWriter writer = new FileWriter(restEndpointPath.toFile(), true)) {
 				for (String line : lines) {
@@ -75,7 +76,7 @@ public class GenerateRest implements Runnable {
 					writer.write("\n");
 				}
 
-				System.out.println("File " + restEndpointPath.relativize(Project.DIR.toPath()) + " has been succesfully updated!");
+				System.out.println("File " + restEndpointPath + " has been succesfully created!");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
