@@ -318,8 +318,7 @@ File src/main/java/org/acme/Address.java has been succesfully created.
 
 ## generate-rest
 
-  Generate JAX-RS endpoints using ChatGPT.
-  Also inspired by Max Andersen's [explain](https://github.com/maxandersen/jbang-catalog/tree/master/explain). 
+  Generate JAX-RS endpoints for existing JPA entities using ChatGPT.
 
 ### Enabling the extension
 
@@ -331,3 +330,25 @@ Added plugin:
 
 ```
 
+### Usage
+```sh
+❯ quarkus generate-rest org.acme.Address org.acme.AddressResource
+```
+## generate-test
+
+  Generate Junit5 Quarkus tests for existing JAX-RS endpoints using ChatGPT.
+
+### Enabling the extension
+
+```sh
+❯ quarkus plug add generate-test
+Added plugin:
+    Name                   	 Type  	 Scope 	 Location                                 	 Description 	
+ *  generate-test        	 jbang 	 user  	 quarkus-generate-test@iocanel 	             	
+
+```
+
+### Usage
+```sh
+❯ quarkus generate-test org.acme.AddressResource org.acme.AddressTest
+`
