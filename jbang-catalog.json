@@ -17,11 +17,17 @@
     "quarkus-generate-data": {
       "script-ref": "GenerateData.java"
     },
-    "quarkus-generate-rest": {
+    "quarkus-generate-rest-api": {
       "script-ref": "GenerateRest.java"
     },
-    "quarkus-generate-test": {
-      "script-ref": "GenerateTest.java"
+    "quarkus-generate-rest-test": {
+      "script-ref": "GenerateRestTest.java"
+    },
+    "quarkus-generate-graphql-api": {
+      "script-ref": "GenerateGraphql.java"
+    },
+    "quarkus-generate-graphql-test": {
+      "script-ref": "GenerateGraphqlTest.java"
     },
     "quarkus-present": {
       "script-ref": "Present.java"

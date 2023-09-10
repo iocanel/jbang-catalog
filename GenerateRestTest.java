@@ -25,14 +25,16 @@ import picocli.CommandLine.Option;
  * Inspired and reused code from: https://github.com/maxandersen/jbang-catalog/blob/master/explain/explain.java
  */
 @CommandLine.Command
-public class GenerateTest implements Runnable {
+public class GenerateRestTest implements Runnable {
 
+	@CommandLine.Parameters(index = "0", arity="1..N", description = "The (fully qualified) class name of the rest api.")
+	String apiName;
 
-	@CommandLine.Parameters(index = "0", arity="1..N", description = "The (fully qualified) class name of the rest endpoint.")
-	String restEndpointName;
-
-	@CommandLine.Parameters(index = "1", arity="1..N", description = "The (fully qualified) class name of the test class.")
+	@CommandLine.Parameters(index = "1", arity="0..1", description = "The (fully qualified) class name of the test class.")
 	String testName;
+
+	@Option(names = { "-e", "--entity" }, description = "The entity to use", required = false, hidden=true)
+	String entityName;
 
 	@Option(names = { "-t", "--token" }, description = "The OpenAI API token", required = true, defaultValue = "${OPENAI_API_KEY}", hidden=true)
 	String token;
@@ -45,31 +47,44 @@ public class GenerateTest implements Runnable {
 
 	@Override
 	public void run() {
+    if (testName == null || testName.isEmpty()) {
+      testName = apiName + "Test";
+    }
+
+    if (entityName == null || entityName.isEmpty()) {
+      String apiClassName = Project.classNameOf(apiName);
+      entityName = apiClassName
+      .replaceAll("Resource$", "")
+      .replaceAll("Endpoint$", "");
+    }
 
 		Optional<String> packageName = Project.packageOf(testName);
 		String className = Project.classNameOf(testName);
 		Path testPath = Project.javaTestFileOf(testName);
 
-		Optional<Path> sourceFile = Project.findJavaSourceFile(restEndpointName);
+		Optional<Path> apiFile = Project.findJavaSourceFile(apiName);
+    Optional<Path> entityFile = Project.findJavaSourceFile(entityName);
+
 		File importSql = new File(Project.RESOURCES, "import.sql");
-		sourceFile.ifPresent(f-> {
+		apiFile.ifPresent(f-> {
 			//working around CR1 bug with passing arguments
-			System.out.println("Generating rest endpoint for entity " + restEndpointName + " with model " + model + " and temperature " + temperature + ". Have patience...");
+			System.out.println("Generating test for JAX-RS API " + apiName + " of entity " + entityName + " with model " + model + " and temperature " + temperature + ". Have patience...");
 
 			CodeGenerator generator = CodeGenerator.forJava(token, model, temperature);
-			List<String> lines = generator.generate("Your input is going to be JPA entity source files." +
+			List<String> lines = generator.generate("Your input is going to be JAX-RS API source files." +
 				"Generate a java class with name: " + className + packageName.map(p -> " and package:" + p).orElse(" and no package") + "."  +
-        "The class should be Junit5 that uses RestAssured to test the rest endpoint class."  +
+        "The class should be Junit5 that uses RestAssured to test the JAX-RS API."  +
         "The class should be annotated with the @QuarkusTest annotation."  +
         "The test methods should take into consideration the import.sql that is used to initialize test data."  +
         "The method that tests create should use realistic random data and avoid data that are present in the import.sql and may cause constraint violations."  +
         "The import.sql is imported by Quarkus and should not be imported by the test class."  +
-        "The test should only interact with application via rest." +
-        "The test should never intject the EntityManager." +
+        "The test should only interact with application via JAX-RS." +
+        "The test should never inject the EntityManager." +
         "The test should use no Before or After annotations."  +
         "Avoid using the same ids for create, delete and update methods to prevent ordering issues." +
-        "The target rest endpoint is: \n" +
+        "The target JAX-RS API is: \n" +
 				Project.readFile(f) + "\n." +
+        entityFile.map(e -> "The target entity is: \n" + Project.readFile(e)).orElse("") +
         "The import.sql script that is used to initialize test data is:" + Project.readFile(importSql.toPath()) + "."
       );
 

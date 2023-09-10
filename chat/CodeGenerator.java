@@ -11,7 +11,10 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 public class CodeGenerator {
 
-	private static final String JAVA_PROMPT = "You are a java code generator. Your responses should be only parsable java code."; 
+	private static final String JAVA_PROMPT = "You are a java code generator. Your responses should be only parsable java code." + 
+  "The code should be syntactically correct and compile." + 
+  "The code should import all necessary classes." +
+  "The code should jarkarta.* instead javax.* packages.";
 	private static final String SQL_PROMPT = "You are a sql code generator. Your responses should be only parsable sql code."; 
 	private static final String PARSING_INSTRUCTIONS = "The code that will be generated should always be surrounded by triple back ticks ` followed by a newline.";
 

@@ -25,7 +25,7 @@ import picocli.CommandLine.Option;
  * Inspired and reused code from: https://github.com/maxandersen/jbang-catalog/blob/master/explain/explain.java
  */
 @CommandLine.Command
-public class GenerateRest implements Runnable {
+public class GenerateGraphql implements Runnable {
 
 
 	@CommandLine.Parameters(index = "0", arity="1..N", description = "The (fully qualified) class name of the entity.")
@@ -56,17 +56,22 @@ public class GenerateRest implements Runnable {
 		Optional<Path> sourceFile = Project.findJavaSourceFile(entityName);
 		sourceFile.ifPresent(f-> {
 			//working around CR1 bug with passing arguments
-			System.out.println("Generating rest endpoint for entity " + entityName + " with model " + model + " and temperature " + temperature + ". Have patience...");
+			System.out.println("Generating GraphQL API for entity " + entityName + " with model " + model + " and temperature " + temperature + ". Have patience...");
 
 			CodeGenerator generator = CodeGenerator.forJava(token, model, temperature);
 			List<String> lines = generator.generate("Your input is going to be JPA entity source files." +
 				"Generate a java class with name: " + className + packageName.map(p -> " and package:" + p).orElse(" and no package") + "."  +
-        "The class should be JAX-RS endpoint that implements CRUD operations."  +
-        "The generated class should avoid using named queries." +
+        "The class should be a GraphQL API that implements CRUD operations that uses quarkus-smallrye-graphql."  +
+        "The class should import annotations from org.eclipse.microprofile.graphql."  +
+        "The class should be annotated with @GrphQLApi."  +
+        "@Query and @Mutation should include name that contains the entity name."  +
+        "The generated class should only use named queries or utility methods if they exists in the entity." +
         "The generated class should only inject the EntityManager." +
+        "The generated class may use static methods found on the entity." +
         (usePanache ? "The generated class may use static PanacheEntity methods." : "") +
         "Methods that that write to the database should be annotated with the @Transactional annotation."  +
         "The generated class should include a method to list all." +
+        "Use jakarta. packages instead of javax." +
         "The target entity is: \n" +
 				Project.readFile(f));
 
