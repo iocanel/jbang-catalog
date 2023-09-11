@@ -26,6 +26,9 @@
     "quarkus-generate-graphql-api": {
       "script-ref": "GenerateGraphql.java"
     },
+    "quarkus-generate-graphql-client": {
+      "script-ref": "GenerateGraphqlClient.java"
+    },
     "quarkus-generate-graphql-test": {
       "script-ref": "GenerateGraphqlTest.java"
     },
