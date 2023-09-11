@@ -76,17 +76,15 @@ public class GenerateGraphqlTest implements Runnable {
         "The class should be Junit5 that uses RestAssured to test the GraphQL API."  +
         "Use java 17 triple quotation syntax for grapql queries and mutations instead of escaping quotes."  +
         "The class should be annotated with the @QuarkusTest annotation."  +
-        "The test methods should take into consideration the import.sql that is used to initialize test data."  +
-        "The method that tests create should use realistic random data and avoid data that are present in the import.sql and may cause constraint violations."  +
-        "The import.sql is imported by Quarkus and should not be imported by the test class."  +
+        "The method that tests create should make no assumptions on the state/content of the database."  +
         "The test should only interact with application via GraphQL." +
         "The test should never inject the EntityManager." +
         "The test should use no Before or After annotations."  +
         "Avoid using the same ids for create, delete and update methods to prevent ordering issues." +
         "The target GraphQL API is: \n" +
 				Project.readFile(f) + "\n." +
-        entityFile.map(e -> "The target entity is: \n" + Project.readFile(e)).orElse("") +
-        "The import.sql script that is used to initialize test data is:" + Project.readFile(importSql.toPath()) + "."
+        entityFile.map(e -> "The target entity is: \n" + Project.readFile(e)).orElse("") + "."
+        //"The import.sql script that is used to initialize test data is:" + Project.readFile(importSql.toPath()) + "."
       );
 
       if (!testPath.getParent().toFile().exists() 
