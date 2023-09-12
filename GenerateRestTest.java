@@ -75,17 +75,13 @@ public class GenerateRestTest implements Runnable {
 				"Generate a java class with name: " + className + packageName.map(p -> " and package:" + p).orElse(" and no package") + "."  +
         "The class should be Junit5 that uses RestAssured to test the JAX-RS API."  +
         "The class should be annotated with the @QuarkusTest annotation."  +
-        "The test methods should take into consideration the import.sql that is used to initialize test data."  +
-        "The method that tests create should use realistic random data and avoid data that are present in the import.sql and may cause constraint violations."  +
-        "The import.sql is imported by Quarkus and should not be imported by the test class."  +
         "The test should only interact with application via JAX-RS." +
         "The test should never inject the EntityManager." +
-        "The test should use no Before or After annotations."  +
+        "The test should use have a @BeforeAll @Transactional method where it should create a toCreate,toGet,toSearch,toDelete and toUpdate entity that will be used in the test methods."  +
         "Avoid using the same ids for create, delete and update methods to prevent ordering issues." +
         "The target JAX-RS API is: \n" +
 				Project.readFile(f) + "\n." +
-        entityFile.map(e -> "The target entity is: \n" + Project.readFile(e)).orElse("") +
-        "The import.sql script that is used to initialize test data is:" + Project.readFile(importSql.toPath()) + "."
+        entityFile.map(e -> "The target entity is: \n" + Project.readFile(e)).orElse("") 
       );
 
       if (!testPath.getParent().toFile().exists() 

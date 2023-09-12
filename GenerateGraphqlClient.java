@@ -80,6 +80,7 @@ public class GenerateGraphqlClient implements Runnable {
         "The class should be annotated with the @GraphQLClientApi annotation from io.smallrye.graphql.client.typesafe.api package."  +
         "Methods that perform mutations should be annotated with the @org.eclipse.microprofile.graphql.Mutation annotation." +
         "Methods that perform queries should be annotated with the @org.eclipse.microprofile.graphql.Query annotation." +
+        "Methods that that write to the database should be annotated with the @jakarta.transaction.Transactional annotation."  +
         "The target GraphQL API is: \n" +
 				Project.readFile(f) + "\n." +
         entityFile.map(e -> "The target entity is: \n" + Project.readFile(e)).orElse("") + "."

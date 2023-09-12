@@ -25,7 +25,7 @@ import picocli.CommandLine.Option;
  * Inspired and reused code from: https://github.com/maxandersen/jbang-catalog/blob/master/explain/explain.java
  */
 @CommandLine.Command
-public class GenerateGraphql implements Runnable {
+public class GenerateGraphqlApi implements Runnable {
 
 
 	@CommandLine.Parameters(index = "0", arity="1..N", description = "The (fully qualified) class name of the entity.")
@@ -66,10 +66,9 @@ public class GenerateGraphql implements Runnable {
         "The class should be annotated with @GrphQLApi."  +
         "@Query and @Mutation should include name that contains the entity name."  +
         "The generated class should only use named queries or utility methods if they exists in the entity." +
-        "The generated class should only inject the EntityManager." +
         "The generated class may use static methods found on the entity." +
-        (usePanache ? "The generated class may use static PanacheEntity methods." : "") +
-        "Methods that that write to the database should be annotated with the @Transactional annotation."  +
+        (usePanache ? "The generated class may use static PanacheEntity methods." : "The generated class should only inject the EntityManager.") +
+        "Methods that that write to the database should be annotated with the @jakarta.transaction.Transactional annotation."  +
         "The generated class should include a method to list all." +
         "Use jakarta. packages instead of javax." +
         "The target entity is: \n" +

@@ -86,6 +86,22 @@ public class Project {
 	}
 
 	/**
+	 * Search the project and find a java test file matching the specified
+	 * fully qualified class name.
+	 * The function searches the project sources.
+	 * @param fqcn the fully qualified class name
+	 * @return an optional path or empty if file not found.
+	**/
+	public static Optional<Path> findJavaTestFile(String fqcn) {
+		String className = classNameOf(fqcn);
+		try (Stream<Path> paths = Files.walk(TEST_JAVA.toPath())) {
+			return paths.filter(p -> p.toFile().getName().equals(className + ".java")).findFirst();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
 	 * Create the Path to a java source file matching the specified
 	 * fully qualified class name.
 	 * The function just perfroms mapping it does not actually search.

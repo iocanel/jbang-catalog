@@ -36,6 +36,9 @@ public class GenerateGraphqlTest implements Runnable {
 	@Option(names = { "-e", "--entity" }, description = "The entity to use", required = false, hidden=true)
 	String entityName;
 
+	@Option(names = { "-c", "--client" }, description = "The client to use", required = false, hidden=true)
+	String clientName;
+
 	@Option(names = { "-t", "--token" }, description = "The OpenAI API token", required = true, defaultValue = "${OPENAI_API_KEY}", hidden=true)
 	String token;
 
@@ -51,6 +54,10 @@ public class GenerateGraphqlTest implements Runnable {
       testName = apiName + "Test";
     }
 
+    if (clientName == null || clientName.isEmpty()) {
+      clientName = apiName + "Client";
+    }
+
     if (entityName == null || entityName.isEmpty()) {
       String apiClassName = Project.classNameOf(apiName);
       entityName = apiClassName
@@ -64,27 +71,31 @@ public class GenerateGraphqlTest implements Runnable {
 
 		Optional<Path> apiFile = Project.findJavaSourceFile(apiName);
     Optional<Path> entityFile = Project.findJavaSourceFile(entityName);
+    Optional<Path> clientFile = Project.findJavaSourceFile(clientName).or(() -> Project.findJavaTestFile(clientName));
 
 		File importSql = new File(Project.RESOURCES, "import.sql");
 		apiFile.ifPresent(f-> {
 			//working around CR1 bug with passing arguments
-			System.out.println("Generating test for GraphQL API " + apiName + " of entity " + entityName + " with model " + model + " and temperature " + temperature + ". Have patience...");
+			System.out.println("Generating test for GraphQL API " + apiName + " of entity " + entityName + 
+        clientFile.map(c -> " with client " + c).orElse("") +
+        " with model " + model + " and temperature " + temperature + ". Have patience...");
 
 			CodeGenerator generator = CodeGenerator.forJava(token, model, temperature);
 			List<String> lines = generator.generate("Your input is going to be GraphQL API source files." +
 				"Generate a java 17 class with name: " + className + packageName.map(p -> " and package:" + p).orElse(" and no package") + "."  +
-        "The class should be Junit5 that uses RestAssured to test the GraphQL API."  +
+        "The class should be Junit5 that uses " + 
+        (clientFile.isPresent() ? " the injected GraphQLClientApi" : " RestAssured") + " to test the GraphQL API."  +
+        (clientFile.isPresent() ? "The test should inject and use the GraphQL client:" + clientName : "")  +
         "Use java 17 triple quotation syntax for grapql queries and mutations instead of escaping quotes."  +
         "The class should be annotated with the @QuarkusTest annotation."  +
-        "The method that tests create should make no assumptions on the state/content of the database."  +
-        "The test should only interact with application via GraphQL." +
         "The test should never inject the EntityManager." +
-        "The test should use no Before or After annotations."  +
-        "Avoid using the same ids for create, delete and update methods to prevent ordering issues." +
+        "The test should use have a @BeforeAll @Transactional method where it should create a toCreate,toGet,toSearch,toDelete and toUpdate entity that will be used in the test methods."  +
+        "Do not use @ExtendWith." +
+        "Import java.util.List." +
         "The target GraphQL API is: \n" +
 				Project.readFile(f) + "\n." +
-        entityFile.map(e -> "The target entity is: \n" + Project.readFile(e)).orElse("") + "."
-        //"The import.sql script that is used to initialize test data is:" + Project.readFile(importSql.toPath()) + "."
+        entityFile.map(e -> "The target entity is: \n" + Project.readFile(e)).orElse("") + "." +
+        (clientFile.isPresent() ? "The GraphQL client: \n" + Project.readFile(clientFile.get()) : "") + "."
       );
 
       if (!testPath.getParent().toFile().exists() 

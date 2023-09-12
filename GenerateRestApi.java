@@ -25,7 +25,7 @@ import picocli.CommandLine.Option;
  * Inspired and reused code from: https://github.com/maxandersen/jbang-catalog/blob/master/explain/explain.java
  */
 @CommandLine.Command
-public class GenerateRest implements Runnable {
+public class GenerateRestApi implements Runnable {
 
 
 	@CommandLine.Parameters(index = "0", arity="1..N", description = "The (fully qualified) class name of the entity.")
